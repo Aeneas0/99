@@ -241,3 +241,27 @@ prime_factors_mult n = encode' $ primeFactors n
 	where 
 		encode' [] = []
 		encode' (x:xs) = (x, length $ x:takeWhile (==x) xs) : encode' (dropWhile (==x) xs)
+
+--Problem 37
+-- Calculate Euler's totient function phi(m) (improved.)
+-- Use the special formula given.
+totient' m = product [(p-1) * p ^ (c - 1) | (p, c) <- prime_factors_mult m]
+
+--problem 39
+-- A list of prime numbers.
+-- Given a range of integers by its lower and upper limit, construct a list of all prime numbers in that range
+primesR :: Integer -> Integer -> [Integer]
+primesR lo hi = [ x | x <- [lo..hi], isPrime x]
+
+--Problem 40
+-- Goldbach's conjecture
+goldbach :: Integer -> (Integer, Integer)
+goldbach n = head [ (x,y) | x <- pr, y <- pr, x+y ==n ]
+	where pr = primesR 2 (n-2)
+	
+--Problem 41
+--Given a range of integers by its lower and upper limit, print a list of all even numbers and their
+-- Goldbach  numbers.
+goldbachList :: Integer -> Integer -> [(Integer, Integer)]
+goldbachList lo hi = map goldbach $ dropWhile (<4) $ filter even [lo..hi]
+goldbachList' lo hi min = filter (\(x,y) -> x > min && y > min) $ goldbachList lo hi
