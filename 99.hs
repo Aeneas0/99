@@ -256,7 +256,7 @@ primesR lo hi = [ x | x <- [lo..hi], isPrime x]
 --Problem 40
 -- Goldbach's conjecture
 goldbach :: Integer -> (Integer, Integer)
-goldbach n = head [ (x,y) | x <- pr, y <- pr, x+y ==n ]
+goldbach n = head [ (x,y) | x <- pr, y <- pr, (x+y == n)]
 	where pr = primesR 2 (n-2)
 	
 --Problem 41
@@ -265,3 +265,65 @@ goldbach n = head [ (x,y) | x <- pr, y <- pr, x+y ==n ]
 goldbachList :: Integer -> Integer -> [(Integer, Integer)]
 goldbachList lo hi = map goldbach $ dropWhile (<4) $ filter even [lo..hi]
 goldbachList' lo hi min = filter (\(x,y) -> x > min && y > min) $ goldbachList lo hi
+
+--Problem 46
+-- Define predicates and, or, nand, nor, xor, impl, and equ
+and'  a b = a && b
+or'   a b = a || b
+nand' a b = not (and' a b)
+nor'  a b = not (or' a b)
+xor'  a b = not (equ' a b)
+impl' a b = or' (not a) b
+equ'  a b = a == b
+
+table :: (Bool -> Bool -> Bool) -> IO ()
+table f = mapM_ putStrLn [show a ++ " " ++ show b ++ " " ++ show (f a b)
+								| a <- [True, False], b <- [True, False]]
+
+--Binary Trees --
+data Tree a = Empty | Branch a (Tree a) (Tree a)
+			  deriving (Show, Eq)
+
+leaf x = Branch x Empty Empty
+--Problem 54A
+-- Check whether a given term represents a binary tree
+countBranches :: Tree a -> Integer
+countBranches Empty = 0
+countBranches (Branch _ l r) = 1 + countBranches l + countBranches r
+
+
+--Problem 55
+-- Construct a completely balanced tree from any given number of nodes.
+cbalTree :: Int -> [Tree Char]
+cbalTree 0 = [Empty] --Can't make a tree from 0 nodes
+cbalTree 1 = [leaf 'x']
+cbalTree n = if mod n 2 == 1 then --If there are equal number of child nodes to be made.
+			--Partition branches into an equal number of children.
+			 [ Branch 'x' l r | l <- cbalTree (div (n-1) 2), 
+								r <- cbalTree (div (n-1) 2) ] 
+			 else -- One branch must have exactly one more node than the other
+			 concat [ [Branch 'x' l r, Branch 'x' l r] | l <- cbalTree (div (n-1) 2),
+													   r <- cbalTree (div n 2)]
+--Problem 56
+-- Determine whether a binary tree is symmetric. A binary tree is symmetric
+-- if each child node contains equal number of left and right branches.
+mirror :: Tree a -> Tree a -> Bool
+mirror  Empty 		   Empty 		 = True
+mirror (Branch _ a b) (Branch _ x y) = mirror a y && mirror b x
+mirror  _			   _ 			 = False
+
+isSymmetric :: Tree a -> Bool
+isSymmetric Empty			 = True
+isSymmetric (Branch _ l r) = mirror l r
+
+--Problem 57 Binary search trees (dictionaries)
+-- write a construct function to construct a binary search tree froma list
+-- of integers.
+addNode :: Ord a => a -> Tree a -> Tree a
+addNode x Empty 	= Branch x Empty Empty
+addNode x t@(Branch y l r) = case compare x y of
+							  LT -> Branch y (addNode x l) r
+							  GT -> Branch y l (addNode x r)
+							  EQ -> t
+						   
+construct xs = foldl (flip addNode) Empty xs
