@@ -285,6 +285,7 @@ data Tree a = Empty | Branch a (Tree a) (Tree a)
 			  deriving (Show, Eq)
 
 leaf x = Branch x Empty Empty
+
 --Problem 54A
 -- Check whether a given term represents a binary tree
 countBranches :: Tree a -> Integer
